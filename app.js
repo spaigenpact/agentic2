@@ -1,6 +1,6 @@
 /**** Configuration ****/
-const API_URL = 'https://agentic2.vercel.app/api/chat'; 
-// Replace with your actual Vercel endpoint if different
+// Replace with your deployed serverless function URL
+const API_URL = 'https://agentic2.vercel.app/api/chat';
 
 /**** Display and Speech Synthesis ****/
 
@@ -9,35 +9,27 @@ function displayMessage(sender, text) {
   const messageEl = document.createElement('p');
   messageEl.innerText = `${sender}: ${text}`;
   chatLog.appendChild(messageEl);
-  chatLog.scrollTop = chatLog.scrollHeight; // auto-scroll
+  // auto-scroll to bottom
+  chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-// Speak text out loud (TTS)
 function speakText(text) {
   if (!text || text.trim() === "") return;
   if ('speechSynthesis' in window) {
-    // Stop any ongoing speech
+    // cancel any ongoing speech
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US'; // Adjust if needed
-    utterance.onstart = () => console.log("Speech started.");
-    utterance.onend = () => console.log("Speech ended.");
+    utterance.lang = 'en-US'; // adjust if needed
+    utterance.onstart = () => console.log("Speech started");
+    utterance.onend = () => console.log("Speech ended");
     window.speechSynthesis.speak(utterance);
   } else {
     console.warn("Speech synthesis not supported in this browser.");
   }
 }
 
-// Stop reading (interrupt TTS)
-document.getElementById('stop-reading').addEventListener('click', () => {
-  console.log("Stop Reading clicked.");
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-  }
-});
-
-/**** Communicate with GPT-4 (Serverless) ****/
+/**** GPT-4 Serverless Interaction ****/
 
 async function sendMessageToServerless(userMessage) {
   try {
@@ -62,30 +54,45 @@ async function sendMessageToServerless(userMessage) {
   }
 }
 
-async function handleUserMessage(transcript) {
-  if (!transcript.trim()) return;
+async function handleUserMessage(userMessage) {
+  if (!userMessage.trim()) return;
+  
+  // display user's message
+  displayMessage('User', userMessage);
 
-  // Display user speech
-  displayMessage('User', transcript);
+  // send to GPT-4
+  const reply = await sendMessageToServerless(userMessage);
 
-  // Send to GPT-4 and get reply
-  const reply = await sendMessageToServerless(transcript);
-
-  // Display + speak reply
+  // display + speak reply
   displayMessage('Assistant', reply);
   speakText(reply);
 }
 
-/**** Continuous Speech Recognition Setup ****/
+/**** Text-Based Send ****/
+document.getElementById('send-btn').addEventListener('click', () => {
+  const inputField = document.getElementById('user-input');
+  const message = inputField.value.trim();
+  inputField.value = '';
+  handleUserMessage(message);
+});
+
+// Press Enter in input field
+document.getElementById('user-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const message = e.target.value.trim();
+    e.target.value = '';
+    handleUserMessage(message);
+  }
+});
+
+/**** Speech Recognition (Start/Stop) ****/
 
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (!window.SpeechRecognition) {
-  // iOS Safari or other unsupported browsers
-  displayMessage('System', 'Speech recognition not supported in this browser. Try Chrome or Edge.');
+  console.warn("Speech recognition not supported in this browser. Use text input.");
 } else {
   const recognition = new window.SpeechRecognition();
-  recognition.continuous = true;     // keep listening
-  recognition.interimResults = true; // show partial transcripts
+  recognition.interimResults = true;
   recognition.lang = 'en-US';
 
   let finalTranscript = '';
@@ -96,23 +103,43 @@ if (!window.SpeechRecognition) {
       const transcript = event.results[i][0].transcript;
       if (event.results[i].isFinal) {
         finalTranscript += transcript + ' ';
-        // Send the final transcript to GPT-4
-        handleUserMessage(finalTranscript);
-        finalTranscript = '';
       } else {
         interimTranscript += transcript;
       }
     }
-    // optional: you could display interim text somewhere
-    console.log('Interim speech:', finalTranscript + interimTranscript);
+    // show speech in input field
+    document.getElementById('user-input').value = finalTranscript + interimTranscript;
   });
 
-  recognition.addEventListener('end', () => {
-    // auto-restart to maintain continuous listening
+  // Start Voice button
+  document.getElementById('start-voice').addEventListener('click', () => {
+    finalTranscript = '';
+    document.getElementById('user-input').value = '';
     recognition.start();
+    // disable start, enable stop
+    document.getElementById('start-voice').disabled = true;
+    document.getElementById('stop-voice').disabled = false;
   });
 
-  // Start recognition immediately on page load
-  recognition.start();
-  displayMessage('System', 'Listening... (speak now)');
+  // Stop Voice button
+  document.getElementById('stop-voice').addEventListener('click', () => {
+    recognition.stop();
+    // send final transcript automatically
+    const message = document.getElementById('user-input').value.trim();
+    if (message) {
+      document.getElementById('user-input').value = '';
+      handleUserMessage(message);
+    }
+    // re-enable start
+    document.getElementById('start-voice').disabled = false;
+    document.getElementById('stop-voice').disabled = true;
+  });
 }
+
+/**** Stop Reading TTS ****/
+document.getElementById('stop-reading').addEventListener('click', () => {
+  console.log("Stop Reading clicked.");
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+});
