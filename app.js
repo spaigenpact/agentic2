@@ -1,17 +1,15 @@
 /**** Configuration ****/
-// Replace this URL with your deployed serverless function endpoint
-const API_URL = 'https://YOUR-VERCEL-APP.vercel.app/api/chat';
+const API_URL = 'https://agentic2.vercel.app/api/chat'; 
+// Replace with your actual Vercel endpoint if different
 
 /**** Display and Speech Synthesis ****/
 
-// Display a message in the chat log
 function displayMessage(sender, text) {
   const chatLog = document.getElementById('chat-log');
   const messageEl = document.createElement('p');
   messageEl.innerText = `${sender}: ${text}`;
   chatLog.appendChild(messageEl);
-  // Auto-scroll to bottom when a new message is added
-  chatLog.scrollTop = chatLog.scrollHeight;
+  chatLog.scrollTop = chatLog.scrollHeight; // auto-scroll
 }
 
 // Speak text out loud (TTS)
@@ -22,7 +20,7 @@ function speakText(text) {
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US'; // Adjust language if needed
+    utterance.lang = 'en-US'; // Adjust if needed
     utterance.onstart = () => console.log("Speech started.");
     utterance.onend = () => console.log("Speech ended.");
     window.speechSynthesis.speak(utterance);
@@ -31,7 +29,15 @@ function speakText(text) {
   }
 }
 
-/**** Serverless Request ****/
+// Stop reading (interrupt TTS)
+document.getElementById('stop-reading').addEventListener('click', () => {
+  console.log("Stop Reading clicked.");
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+});
+
+/**** Communicate with GPT-4 (Serverless) ****/
 
 async function sendMessageToServerless(userMessage) {
   try {
@@ -48,55 +54,65 @@ async function sendMessageToServerless(userMessage) {
     }
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || "No reply received.";
+    const reply = data.choices?.[0]?.message?.content ?? "No reply received.";
     return reply;
   } catch (error) {
-    console.error('Error communicating with serverless function:', error);
+    console.error('Error calling serverless function:', error);
     return "Error processing your request.";
   }
 }
 
-/**** Chat Flow ****/
+async function handleUserMessage(transcript) {
+  if (!transcript.trim()) return;
 
-async function handleUserMessage(userMessage) {
-  if (!userMessage.trim()) return;
-  
-  // Display user's message
-  displayMessage('User', userMessage);
+  // Display user speech
+  displayMessage('User', transcript);
 
-  // Send to GPT-4 (serverless) and get reply
-  const reply = await sendMessageToServerless(userMessage);
+  // Send to GPT-4 and get reply
+  const reply = await sendMessageToServerless(transcript);
 
-  // Display GPT-4's reply
+  // Display + speak reply
   displayMessage('Assistant', reply);
-
-  // Speak the reply
   speakText(reply);
 }
 
-/**** UI Event Listeners ****/
+/**** Continuous Speech Recognition Setup ****/
 
-// Send button (for typed input)
-document.getElementById('send-btn').addEventListener('click', () => {
-  const inputField = document.getElementById('user-input');
-  const message = inputField.value.trim();
-  inputField.value = '';
-  handleUserMessage(message);
-});
+window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!window.SpeechRecognition) {
+  // iOS Safari or other unsupported browsers
+  displayMessage('System', 'Speech recognition not supported in this browser. Try Chrome or Edge.');
+} else {
+  const recognition = new window.SpeechRecognition();
+  recognition.continuous = true;     // keep listening
+  recognition.interimResults = true; // show partial transcripts
+  recognition.lang = 'en-US';
 
-// Press Enter to send
-document.getElementById('user-input').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    const message = e.target.value.trim();
-    e.target.value = '';
-    handleUserMessage(message);
-  }
-});
+  let finalTranscript = '';
 
-// Stop Reading button: interrupt TTS
-document.getElementById('stop-reading').addEventListener('click', () => {
-  console.log("Stop Reading clicked.");
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-  }
-});
+  recognition.addEventListener('result', (event) => {
+    let interimTranscript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += transcript + ' ';
+        // Send the final transcript to GPT-4
+        handleUserMessage(finalTranscript);
+        finalTranscript = '';
+      } else {
+        interimTranscript += transcript;
+      }
+    }
+    // optional: you could display interim text somewhere
+    console.log('Interim speech:', finalTranscript + interimTranscript);
+  });
+
+  recognition.addEventListener('end', () => {
+    // auto-restart to maintain continuous listening
+    recognition.start();
+  });
+
+  // Start recognition immediately on page load
+  recognition.start();
+  displayMessage('System', 'Listening... (speak now)');
+}
