@@ -1,5 +1,6 @@
 /**** Configuration ****/
-// Replace with your deployed serverless function URL
+// Replace with your actual deployed serverless function URL
+// e.g., "https://agentic2.vercel.app/api/chat" if you named your Vercel project "agentic2"
 const API_URL = 'https://agentic2.vercel.app/api/chat';
 
 /**** Display and Speech Synthesis ****/
@@ -9,18 +10,18 @@ function displayMessage(sender, text) {
   const messageEl = document.createElement('p');
   messageEl.innerText = `${sender}: ${text}`;
   chatLog.appendChild(messageEl);
-  // auto-scroll to bottom
+  // auto-scroll to bottom when a new message is added
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
 function speakText(text) {
   if (!text || text.trim() === "") return;
   if ('speechSynthesis' in window) {
-    // cancel any ongoing speech
+    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US'; // adjust if needed
+    utterance.lang = 'en-US'; // Adjust if needed
     utterance.onstart = () => console.log("Speech started");
     utterance.onend = () => console.log("Speech ended");
     window.speechSynthesis.speak(utterance);
@@ -56,19 +57,20 @@ async function sendMessageToServerless(userMessage) {
 
 async function handleUserMessage(userMessage) {
   if (!userMessage.trim()) return;
-  
-  // display user's message
+
+  // Display user message
   displayMessage('User', userMessage);
 
-  // send to GPT-4
+  // Send to GPT-4
   const reply = await sendMessageToServerless(userMessage);
 
-  // display + speak reply
-  displayMessage('Assistant', reply);
-  speakText(reply);
+  // Display + speak reply
+  displayMessage('Assistant', await reply);
+  speakText(await reply);
 }
 
 /**** Text-Based Send ****/
+
 document.getElementById('send-btn').addEventListener('click', () => {
   const inputField = document.getElementById('user-input');
   const message = inputField.value.trim();
@@ -76,7 +78,7 @@ document.getElementById('send-btn').addEventListener('click', () => {
   handleUserMessage(message);
 });
 
-// Press Enter in input field
+// Press Enter to send typed input
 document.getElementById('user-input').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     const message = e.target.value.trim();
@@ -90,6 +92,7 @@ document.getElementById('user-input').addEventListener('keydown', (e) => {
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (!window.SpeechRecognition) {
   console.warn("Speech recognition not supported in this browser. Use text input.");
+  // Optionally display a message in the chat about no voice support
 } else {
   const recognition = new window.SpeechRecognition();
   recognition.interimResults = true;
@@ -107,8 +110,16 @@ if (!window.SpeechRecognition) {
         interimTranscript += transcript;
       }
     }
-    // show speech in input field
+    // Display recognized text in the input field
     document.getElementById('user-input').value = finalTranscript + interimTranscript;
+  });
+
+  // This event fires when recognition completely stops
+  recognition.addEventListener('end', () => {
+    console.log("Speech recognition ended");
+    // Re-enable Start Voice button, disable Stop Voice
+    document.getElementById('start-voice').disabled = false;
+    document.getElementById('stop-voice').disabled = true;
   });
 
   // Start Voice button
@@ -116,7 +127,7 @@ if (!window.SpeechRecognition) {
     finalTranscript = '';
     document.getElementById('user-input').value = '';
     recognition.start();
-    // disable start, enable stop
+    // Disable Start, enable Stop
     document.getElementById('start-voice').disabled = true;
     document.getElementById('stop-voice').disabled = false;
   });
@@ -124,15 +135,13 @@ if (!window.SpeechRecognition) {
   // Stop Voice button
   document.getElementById('stop-voice').addEventListener('click', () => {
     recognition.stop();
-    // send final transcript automatically
+    // On end, 'end' event above will also fire
+    // Send final transcript automatically
     const message = document.getElementById('user-input').value.trim();
     if (message) {
       document.getElementById('user-input').value = '';
       handleUserMessage(message);
     }
-    // re-enable start
-    document.getElementById('start-voice').disabled = false;
-    document.getElementById('stop-voice').disabled = true;
   });
 }
 
