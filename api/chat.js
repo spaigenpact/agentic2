@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Preflight request
+  // Handle preflight
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -30,9 +30,9 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-4", // GPT-4 model (paid access required)
+        model: "gpt-4", // requires GPT-4 access
         messages: [
-          { role: "system", content: "You are a helpful banking assistant." },
+          { role: "system", content: "You are a helpful, voice-enabled banking assistant." },
           { role: "user", content: message }
         ]
       })
