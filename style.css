@@ -1,0 +1,58 @@
+/* Basic reset and body styling */
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  margin: 0;
+  padding: 20px;
+}
+
+/* Container styling for centering and aesthetics */
+.container {
+  max-width: 600px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading styling */
+h1 {
+  text-align: center;
+}
+
+/* Chat log container styling */
+#chat-log {
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #fafafa;
+}
+
+/* Input and button styling */
+#user-input,
+button {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  margin: 5px 0;
+}
+
+button {
+  cursor: pointer;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Specific button colors */
+#send-btn {
+  background: #007bff; /* Blue */
+}
+
+#stop-reading {
+  background: #dc3545; /* Red */
+  margin-bottom: 10px;
+}
