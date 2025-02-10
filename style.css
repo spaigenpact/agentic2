@@ -31,28 +31,18 @@ h1 {
   background: #fafafa;
 }
 
-/* Input and button styling */
-#user-input,
+/* Buttons styling */
 button {
   width: 100%;
   padding: 10px;
-  font-size: 1rem;
   margin: 5px 0;
-}
-
-button {
+  font-size: 1rem;
   cursor: pointer;
   color: white;
   border: none;
   border-radius: 4px;
 }
 
-/* Specific button colors */
-#send-btn {
-  background: #007bff; /* Blue */
-}
-
 #stop-reading {
-  background: #dc3545; /* Red */
-  margin-bottom: 10px;
+  background-color: #dc3545; /* red */
 }
