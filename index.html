@@ -4,24 +4,37 @@
   <meta charset="UTF-8" />
   <!-- Mobile friendly viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agentic2 GPT-4 Voice Chat</title>
+  <title>Agentic2 GPT-4 Chatbot</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Agentic2 GPT-4 Voice Chat</h1>
+    <h1>Agentic2 GPT-4 Chatbot</h1>
 
     <!-- Chat log where messages appear -->
     <div id="chat-log"></div>
 
-    <!-- "Stop Reading" button to interrupt TTS -->
+    <!-- User text input (fallback for non-voice or iOS) -->
+    <input
+      type="text"
+      id="user-input"
+      placeholder="Type your message here..."
+    />
+
+    <!-- Buttons to control speech recognition and message sending -->
+    <button id="start-voice">Start Voice</button>
+    <button id="stop-voice" disabled>Stop Voice</button>
+    <button id="send-btn">Send</button>
+
+    <!-- Optional: Stop reading TTS mid-response -->
     <button id="stop-reading">Stop Reading</button>
   </div>
 
   <!-- iOS Audio Unlock Snippet (for text-to-speech on iOS) -->
   <script>
     /**
-     * iOS blocks audio (like speech synthesis) until there's a user gesture.
+     * iOS blocks audio (like speech synthesis) 
+     * until there's a user gesture.
      * This snippet "unlocks" audio after the user touches the page once.
      */
     function unlockAudioForiOS() {
@@ -34,7 +47,6 @@
     window.addEventListener('touchstart', unlockAudioForiOS, { once: true });
   </script>
 
-  <!-- Main front-end logic -->
   <script src="app.js"></script>
 </body>
 </html>
