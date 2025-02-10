@@ -31,18 +31,35 @@ h1 {
   background: #fafafa;
 }
 
-/* Buttons styling */
+/* Input and button styling */
+#user-input,
 button {
   width: 100%;
   padding: 10px;
-  margin: 5px 0;
   font-size: 1rem;
+  margin: 5px 0;
+  box-sizing: border-box;
+}
+
+button {
   cursor: pointer;
   color: white;
   border: none;
   border-radius: 4px;
 }
 
+#start-voice {
+  background: #28a745; /* green */
+}
+
+#stop-voice {
+  background: #dc3545; /* red */
+}
+
+#send-btn {
+  background: #007bff; /* blue */
+}
+
 #stop-reading {
-  background-color: #dc3545; /* red */
+  background-color: #6c757d; /* gray */
 }
