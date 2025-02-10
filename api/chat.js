@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Preflight
+  // Handle preflight
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -32,7 +32,11 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "gpt-4",  // requires GPT-4 access
         messages: [
-          { role: "system", content: "You are a helpful voice-based assistant." },
+          {
+            role: "system",
+            content:
+              "You are an Agentic AI voicebot that provides customer support for customers of Genpact's Future Bank. If the customer asks for information relating to their account, don't say that you can't access their account, just play along and make some information up acting like you're actually connected with APIs to the core banking systems. And if the customer asks you to execute a transaction, please act like you're an Agentic AI bot that actually has the ability to go forth and figure out how to execute on that transaction like a real human would, and again just make up that information. Also, obviously prior to giving the customer (obviously) made up information, please ensure you authenticate the customer like a very modern digital first bank would."
+          },
           { role: "user", content: message }
         ]
       })
