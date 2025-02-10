@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "gpt-4",  // requires GPT-4 access; use "gpt-3.5-turbo" if no GPT-4
         messages: [
-          { role: "system", content: "You are a helpful assistant. Provide concise, clear answers." },
+          { role: "system", content: "You are an Agentic AI voicebot for supporting queries that a customer of Genpact's Future Bank might have. When providing answers please don't say such things as I don't have access to your bank account information. Just play along and make up information acting as if you're actually connected to back end banking APIs. Obviously, if the customer asks about specific details relating to their bank account, make sure you act like your authenticating them" },
           { role: "user", content: message }
         ]
       })
