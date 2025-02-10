@@ -1,65 +1,111 @@
-/* Basic reset and body styling */
+/* ------------------------
+   Global & Layout Styles
+------------------------- */
+
+/* Use a pastel gradient background for the body */
 body {
-  font-family: Arial, sans-serif;
-  background: #f2f2f2;
   margin: 0;
   padding: 20px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #fce7f3, #e0f4f4);
+  min-height: 100vh;
 }
 
-/* Container styling for centering and aesthetics */
+/* Center the container & add slight 3D effect */
 .container {
   max-width: 600px;
-  margin: auto;
-  background: #fff;
+  margin: 40px auto;
+  background: #ffffffc9; /* white with slight transparency */
+  backdrop-filter: blur(6px);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Heading styling */
+/* Title styling */
 h1 {
   text-align: center;
+  font-weight: 600;
+  margin-bottom: 20px;
 }
 
-/* Chat log container styling */
+/* ------------------------
+   Chat Log & Input Styles
+------------------------- */
+
 #chat-log {
   height: 300px;
   overflow-y: auto;
+  background: #fafafa;
   border: 1px solid #ddd;
   padding: 10px;
-  margin-bottom: 10px;
-  background: #fafafa;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.04);
 }
 
-/* Input and button styling */
-#user-input,
-button {
+#user-input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   font-size: 1rem;
-  margin: 5px 0;
-  box-sizing: border-box;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  outline: none;
 }
+
+/* ------------------------
+   Button Styles
+------------------------- */
 
 button {
-  cursor: pointer;
-  color: white;
+  display: inline-block;
+  width: 100%;
+  margin: 5px 0;
+  padding: 12px;
+  font-size: 1rem;
+  color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  /* Add a glossy, 3D effect using gradients & shadows */
+  background-image: linear-gradient(to bottom right, #d4d4d4, #ffffff);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* On hover, appear more 3D */
+button:hover {
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+  transform: translateY(-2px);
+}
+
+/* On active click, push down slightly */
+button:active {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  transform: translateY(1px);
+}
+
+/* Distinct pastel color theming for each button */
 #start-voice {
-  background: #28a745; /* green */
+  background: linear-gradient(135deg, #a0ead0, #94d8e5);
 }
-
-#stop-voice {
-  background: #dc3545; /* red */
-}
-
 #send-btn {
-  background: #007bff; /* blue */
+  background: linear-gradient(135deg, #a0b2fd, #97defe);
+}
+#stop-voice {
+  background: linear-gradient(135deg, #f8bfbf, #faca9a);
+}
+#stop-reading {
+  background: linear-gradient(135deg, #d4cef4, #e3c5fd);
 }
 
-#stop-reading {
-  background-color: #6c757d; /* gray */
+/* Disable button (gray-ish) */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
